@@ -27,8 +27,10 @@ class DoubleLinkedList:
             item.prev__item = last
 
     def pop(self):
+        returned_value = None
         if self.len() != 0:
             prev_last = self.last.prev__item
+            returned_value = self.last.elem
             if self.len() > 1:
                 first = self.first
                 self.last = prev_last
@@ -37,6 +39,7 @@ class DoubleLinkedList:
             else:
                 self.first = None
                 self.last = None
+        return returned_value
 
     def unshift(self, elem):
         item = Item.Item(elem)
@@ -54,14 +57,18 @@ class DoubleLinkedList:
 
     def shift(self):
         length = self.len()
+        returned_value = None
         if length > 1:
+            returned_value = self.first
             next__item = self.first.next__item
             self.first = next__item
             self.last.next__item = self.first
             self.first.prev__item = self.last
         elif length == 1:
+            returned_value = self.first
             self.first = None
             self.last = None
+        return returned_value
 
     def len(self):
         first = self.first
