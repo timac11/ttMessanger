@@ -1,133 +1,131 @@
 import unittest
-import DoubleLinkedList
+from DoubleLinkedList import DoubleLinkedList
 
 
-def list_creation():
-    pass
+def list_creation(*args):
+    linked_list = DoubleLinkedList()
+    for val in args:
+        linked_list.push(val)
+    return linked_list
 
 
 class TestPushFunction(unittest.TestCase):
     def test_one_element_push(self):
-        list = DoubleLinkedList.DoubleLinkedList()
         value = 1
-        list.push(value)
-        self.assertEqual(list.get_first(), value)
-        self.assertEqual(list.get_last(), value)
-        self.assertEqual(list.len(), value)
+        linked_list = list_creation(value)
+        self.assertEqual(linked_list.first(), value)
+        self.assertEqual(linked_list.last(), value)
+        self.assertEqual(linked_list.len(), 1)
+
+    def test_push_none_type(self):
+        linked_list = list_creation(None)
+        self.assertEqual(linked_list.first(), None)
+        self.assertEqual(linked_list.last(), None)
+        self.assertEqual(linked_list.len(), 1)
 
     def test_two_elements_push(self):
-        list = DoubleLinkedList.DoubleLinkedList()
         first_value = 1
         second_value = 2
-        list.push(first_value)
-        list.push(second_value)
-        self.assertEqual(list.get_first(), first_value)
-        self.assertEqual(list.get_last(), second_value)
-        self.assertEqual(list.len(), 2)
+        linked_list = list_creation(first_value, second_value)
+        self.assertEqual(linked_list.first(), first_value)
+        self.assertEqual(linked_list.last(), second_value)
+        self.assertEqual(linked_list.len(), 2)
 
 
 class TestPopFunction(unittest.TestCase):
     def test_pop_function(self):
-        list = DoubleLinkedList.DoubleLinkedList()
         value = 1
-        list.push(value)
-        list.pop()
-        self.assertEqual(list.get_first(), None)
-        self.assertEqual(list.get_last(), None)
-        self.assertEqual(list.len(), 0)
+        linked_list = list_creation(value)
+        linked_list.pop()
+        self.assertEqual(linked_list.first(), None)
+        self.assertEqual(linked_list.last(), None)
+        self.assertEqual(linked_list.len(), 0)
 
     def test_pop_empty_list(self):
-        list = DoubleLinkedList.DoubleLinkedList()
-        list.pop()
-        self.assertEqual(list.get_first(), None)
-        self.assertEqual(list.get_last(), None)
-        self.assertEqual(list.len(), 0)
+        linked_list = list_creation()
+        linked_list.pop()
+        self.assertEqual(linked_list.first(), None)
+        self.assertEqual(linked_list.last(), None)
+        self.assertEqual(linked_list.len(), 0)
 
 
 class TestDeleteFunction(unittest.TestCase):
     def test_delete_function(self):
-        list = DoubleLinkedList.DoubleLinkedList()
         value = 1
-        list.push(value)
-        list.delete(value)
-        self.assertEqual(list.get_first(), None)
-        self.assertEqual(list.get_last(), None)
-        self.assertEqual(list.len(), 0)
+        linked_list = list_creation(value)
+        linked_list.delete(value)
+        self.assertEqual(linked_list.first(), None)
+        self.assertEqual(linked_list.last(), None)
+        self.assertEqual(linked_list.len(), 0)
 
     def test_remove_from_rmpty_list(self):
-        list = DoubleLinkedList.DoubleLinkedList()
-        self.assertEqual(list.get_first(), None)
-        self.assertEqual(list.get_last(), None)
-        self.assertEqual(list.len(), 0)
+        linked_list = list_creation()
+        self.assertEqual(linked_list.first(), None)
+        self.assertEqual(linked_list.last(), None)
+        self.assertEqual(linked_list.len(), 0)
 
     def test_remove_equals_elements(self):
-        list = DoubleLinkedList.DoubleLinkedList()
         value = 1
-        list.push(value)
-        list.push(value)
-        list.delete(value)
-        self.assertEqual(list.get_first(), value)
-        self.assertEqual(list.get_last(), value)
-        self.assertEqual(list.len(), 1)
+        linked_list = list_creation(value, value)
+        linked_list.delete(value)
+        self.assertEqual(linked_list.first(), value)
+        self.assertEqual(linked_list.last(), value)
+        self.assertEqual(linked_list.len(), 1)
 
     def test_remove_not_found_value(self):
-        list = DoubleLinkedList.DoubleLinkedList()
         value = 1
+        linked_list = list_creation(value)
         not_found = 2
-        list.push(value)
-        list.delete(not_found)
-        self.assertEqual(list.get_first(), value)
-        self.assertEqual(list.get_last(), value)
-        self.assertEqual(list.len(), 1)
+        linked_list.delete(not_found)
+        self.assertEqual(linked_list.first(), value)
+        self.assertEqual(linked_list.last(), value)
+        self.assertEqual(linked_list.len(), 1)
 
 
 class TestContainsFunction(unittest.TestCase):
     def test_contains_function(self):
-        list = DoubleLinkedList.DoubleLinkedList()
         value = 1
-        list.push(value)
+        linked_list = list_creation(value)
         not_found = 2
-        self.assertTrue(list.contains(value))
-        self.assertFalse(list.contains(not_found))
+        self.assertTrue(linked_list.contains(value))
+        self.assertFalse(linked_list.contains(not_found))
 
     def test_contains_none(self):
-        list = DoubleLinkedList.DoubleLinkedList()
         value = 1
-        list.push(value)
-        self.assertFalse(list.contains(None))
+        linked_list = list_creation(value)
+        linked_list.push(value)
+        self.assertFalse(linked_list.contains(None))
 
     def test_contains_empty_list(self):
-        list = DoubleLinkedList.DoubleLinkedList()
-        self.assertFalse(list.contains(None))
-        self.assertFalse(list.contains(1))
+        linked_list = list_creation()
+        self.assertFalse(linked_list.contains(None))
+        self.assertFalse(linked_list.contains(1))
 
 
 class TestUnshiftFunction(unittest.TestCase):
     def test_unshift_function(self):
-        list = DoubleLinkedList.DoubleLinkedList()
         value = 1
-        list.unshift(value)
-        self.assertEqual(list.get_first(), value)
-        self.assertEqual(list.get_last(), value)
-        self.assertEqual(list.len(), 1)
+        linked_list = list_creation(value)
+        self.assertEqual(linked_list.first(), value)
+        self.assertEqual(linked_list.last(), value)
+        self.assertEqual(linked_list.len(), 1)
 
 
 class TestShiftFunction(unittest.TestCase):
     def test_shift_function(self):
-        list = DoubleLinkedList.DoubleLinkedList()
         value = 1
-        list.unshift(value)
-        list.shift()
-        self.assertEqual(list.get_first(), None)
-        self.assertEqual(list.get_last(), None)
-        self.assertEqual(list.len(), 0)
+        linked_list = list_creation(value)
+        linked_list.shift()
+        self.assertEqual(linked_list.first(), None)
+        self.assertEqual(linked_list.last(), None)
+        self.assertEqual(linked_list.len(), 0)
 
     def test_shift_empty_list(self):
-        list = DoubleLinkedList.DoubleLinkedList()
-        list.shift()
-        self.assertEqual(list.get_first(), None)
-        self.assertEqual(list.get_last(), None)
-        self.assertEqual(list.len(), 0)
+        linked_list = list_creation()
+        linked_list.shift()
+        self.assertEqual(linked_list.first(), None)
+        self.assertEqual(linked_list.last(), None)
+        self.assertEqual(linked_list.len(), 0)
 
 
 
