@@ -26,9 +26,10 @@ def query_one(query, **params):
 def query_all(query, **params):
     with get_cursor() as cursor:
         cursor.execute(query, params)
-        data = cursor.fetchall()
-        print('cursor')
-        print(data)
-        return data
+        result = []
+        print(cursor.rowcount)
+        for _ in [0, cursor.rowcount]:
+            result.append(dict(cursor.fetchone()))
+        return result
 
 
