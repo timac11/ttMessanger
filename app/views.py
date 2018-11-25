@@ -26,30 +26,48 @@ def form():
 
 
 """
-    :param: object which contains userId
+    :params: object which contains 
+        userId - uuid string
 """
 
 
 @jsonrpc.method('api.get_messages')
 def get_messages(params):
-    data = json.loads(request.data)
-    print(data)
     if params is None or params['user_id'] is None:
         return {
             'error': 'user not found'
         }
-    user_id = params['user_id']
-    return model.get_messages_by_user_id(user_id)
+    user_id = params.get('user_id')
+    result = model.get_messages_by_user_id(user_id)
+    return result
 
 
-@jsonrpc.method('api.send_message')
-def send_message():
-    return None
+"""
+    :params: object which contains 
+        user_id - uuid string
+        chat_id - uuid string
+        content - string
+        attachment - object 
+"""
+
+
+@jsonrpc.method('api.create_message')
+def create_message(params):
+    print(params)
+    return model.create_message(
+        params.get('user_id'),
+        params.get('chat_id'),
+        params.get('content'),
+        params.get('attachment')
+    )
+
+
+"""
+    param: object which contains
+        message_id
+"""
 
 
 @jsonrpc.method('api.read_messages')
-def read_messages():
-    return None
-
-
-
+def read_messages(params):
+    None

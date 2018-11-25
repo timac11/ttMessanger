@@ -1,6 +1,5 @@
 import app.db as db
-import uuid
-
+from app import utils
 
 """
     /get_messages_by_user_id
@@ -14,7 +13,6 @@ def get_messages_by_user_id(user_id, limit=10):
         WHERE user_id = %(user_id)s
         LIMIT %(limit)s
     """, user_id=user_id, limit=limit)
-    print(result)
     return result
 
 """
@@ -65,9 +63,9 @@ def search_users(search_param, limit=10):
 
 
 def create_chat_by_user_id(user_id, companion_id):
-    chat_id = uuid.uuid1()
-    member_user_id = uuid.uuid1()
-    member_companion_id = uuid.uuid1()
+    chat_id = utils.get_uuid()
+    member_user_id = utils.get_uuid()
+    member_companion_id = utils.get_uuid()
     db.query_one("""
         INSERT INTO chats (chat_id, is_group_chat, topic) 
         VALUES (%(chat_id)s, false, 'hardcaded_value')
@@ -82,6 +80,43 @@ def create_chat_by_user_id(user_id, companion_id):
     """, member_id=member_companion_id, user_id=companion_id, chat_id=chat_id)
 
 
+"""
+    /create_message
+"""
+
+
+def create_message(user_id, chat_id, content, attachment):
+    message_id = utils.get_uuid()
+    member = db.query_one("""
+        SELECT *
+        FROM members 
+        WHERE user_id = %(user_id)s AND chat_id = %(chat_id)s
+    """, user_id=user_id, chat_id=chat_id)
+    # TODO throw exceptions: user/member not found
+    if member is None or member.get('member_id') is None:
+        return {}
+
+    db.insert_query("""
+        INSERT INTO messages (message_id, chat_id, user_id, content)
+        VALUES (%(message_id)s, %(chat_id)s, %(user_id)s, %(content)s)
+    """, message_id=str(message_id), chat_id=str(chat_id), user_id=str(user_id), content=str(content))
+
+    if attachment is not None:
+        attachment_id = utils.get_uuid()
+        db.insert_query("""
+            INSERT INTO attachments (attachment_id, chat_id, user_id, message_id, "type", url)
+            VALUES (%(attachment_id)s , %(chat_id)s, %(user_id)s, %(message_id)s, %(type_)s, %(url)s)
+        """, attachment_id=attachment_id, chat_id=chat_id, user_id=user_id,
+                     message_id=message_id, type_=attachment['type'], url=attachment['url'])
+
+
+def read_message(user_id, chat_id, message_id):
+    db.insert_query("""
+        UPDATE members SET last_read_message_id = %(message_id)s
+        WHERE user_id = %(user_id) AND chat_id = %(chat_id)
+    """, user_id=user_id, chat_id=chat_id, message_id=message_id)
+
+
 def create_group_chat(user_id, topic):
     pass
 
@@ -93,9 +128,6 @@ def add_member_to_group_chat(chat_id, user_ids):
 def leave_from_group_chat(user_id):
     pass
 
-
-def create_message(user_id, chat_id, content, attach_id):
-    pass
 
 
 def upload_file(user_id, content, chat_id):

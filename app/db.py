@@ -8,7 +8,8 @@ from app import config, app
 def get_connection():
     if not hasattr(flask.g, 'dbconn'):
         flask.g.dbconn = psycopg2.connect(
-            dbname=config.DATABASE, user=config.USER_NAME, host='127.0.0.1', password=config.PASSWORD
+            dbname=config.DATABASE, user=config.USER_NAME,
+            host='127.0.0.1', password=config.PASSWORD
         )
     return flask.g.dbconn
 
@@ -16,6 +17,11 @@ def get_connection():
 def get_cursor():
     connection = get_connection()
     return connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+
+def insert_query(query, **params):
+    with get_cursor() as cursor:
+        cursor.execute(query, params)
 
 
 def query_one(query, **params):
@@ -28,8 +34,7 @@ def query_all(query, **params):
     with get_cursor() as cursor:
         cursor.execute(query, params)
         result = []
-        print(cursor.rowcount)
-        for _ in [0, cursor.rowcount]:
+        for i in range(cursor.rowcount):
             result.append(dict(cursor.fetchone()))
         return result
 
@@ -40,6 +45,7 @@ def _rollback_db(sender, exception, **extra):
         conn.rollback()
         conn.close()
         delattr(flask.g, 'dbconn')
+        print('transaction rolled back')
 
 
 def _commit_db(sender, response, **extra):
@@ -48,6 +54,7 @@ def _commit_db(sender, response, **extra):
         conn.commit()
         conn.close()
         delattr(flask.g, 'dbconn')
+        print('transaction committed')
 
 
 flask.got_request_exception.connect(_rollback_db, app)
