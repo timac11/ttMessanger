@@ -66,10 +66,10 @@ def create_chat_by_user_id(user_id, companion_id):
     chat_id = utils.get_uuid()
     member_user_id = utils.get_uuid()
     member_companion_id = utils.get_uuid()
-    db.query_one("""
+    db.edit_query("""
         INSERT INTO chats (chat_id, is_group_chat, topic) 
-        VALUES (%(chat_id)s, false, 'hardcaded_value')
-    """, chat_id=chat_id)
+        VALUES (%(chat_id)s, false, %(topic)s)
+    """, chat_id=chat_id, topic=user_id)
     db.query_one("""
         INSERT INTO members (member_id ,user_id, chat_id) 
         VALUES (%(member_id)s, %(user_id)s, chat_id)
@@ -96,14 +96,14 @@ def create_message(user_id, chat_id, content, attachment):
     if member is None or member.get('member_id') is None:
         return {}
 
-    db.insert_query("""
+    db.edit_query("""
         INSERT INTO messages (message_id, chat_id, user_id, content)
         VALUES (%(message_id)s, %(chat_id)s, %(user_id)s, %(content)s)
     """, message_id=str(message_id), chat_id=str(chat_id), user_id=str(user_id), content=str(content))
 
     if attachment is not None:
         attachment_id = utils.get_uuid()
-        db.insert_query("""
+        db.edit_query("""
             INSERT INTO attachments (attachment_id, chat_id, user_id, message_id, "type", url)
             VALUES (%(attachment_id)s , %(chat_id)s, %(user_id)s, %(message_id)s, %(type_)s, %(url)s)
         """, attachment_id=attachment_id, chat_id=chat_id, user_id=user_id,
@@ -111,7 +111,7 @@ def create_message(user_id, chat_id, content, attachment):
 
 
 def read_message(user_id, chat_id, message_id):
-    db.insert_query("""
+    db.edit_query("""
         UPDATE members SET last_read_message_id = %(message_id)s
         WHERE user_id = %(user_id) AND chat_id = %(chat_id)
     """, user_id=user_id, chat_id=chat_id, message_id=message_id)
@@ -127,7 +127,6 @@ def add_member_to_group_chat(chat_id, user_ids):
 
 def leave_from_group_chat(user_id):
     pass
-
 
 
 def upload_file(user_id, content, chat_id):

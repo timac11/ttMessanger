@@ -19,7 +19,7 @@ def get_cursor():
     return connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 
-def insert_query(query, **params):
+def edit_query(query, **params):
     with get_cursor() as cursor:
         cursor.execute(query, params)
 
