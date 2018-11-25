@@ -42,7 +42,7 @@ def _rollback_db(sender, exception, **extra):
         delattr(flask.g, 'dbconn')
 
 
-def _commit_db():
+def _commit_db(sender, response, **extra):
     if hasattr(flask.g, 'dbconn'):
         conn = flask.g.dbconn
         conn.commit()
