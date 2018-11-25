@@ -70,11 +70,11 @@ def create_chat_by_user_id(user_id, companion_id):
         INSERT INTO chats (chat_id, is_group_chat, topic) 
         VALUES (%(chat_id)s, false, %(topic)s)
     """, chat_id=chat_id, topic=user_id)
-    db.query_one("""
+    db.edit_query("""
         INSERT INTO members (member_id ,user_id, chat_id) 
         VALUES (%(member_id)s, %(user_id)s, chat_id)
     """, member_id=member_user_id ,user_id=user_id, chat_id=chat_id)
-    db.query_one("""
+    db.edit_query("""
         INSERT INTO members (member_id, user_id, chat_id) 
         VALUES (%(member_id)s , %(user_id)s, %(chat_id)s)
     """, member_id=member_companion_id, user_id=companion_id, chat_id=chat_id)
