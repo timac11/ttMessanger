@@ -4,6 +4,12 @@ from app.exceptions import exceptions
 
 ##################GET###################################################
 
+def get_users():
+    return db.query_all("""
+        SELECT *
+        FROM users
+    """)
+
 
 def get_user_by_id(user_id):
     try:

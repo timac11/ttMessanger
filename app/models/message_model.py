@@ -6,6 +6,12 @@ from app.models import user_model, member_model, chat_model
 
 ##################GET###################################################
 
+def get_messages():
+    return db.query_all("""
+        SELECT *
+        FROM messages
+    """)
+
 
 def get_messages_by_user_id(user_id, limit=10):
     user = user_model.get_user_by_id(user_id)

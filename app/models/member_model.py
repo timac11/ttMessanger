@@ -6,6 +6,12 @@ from app.models import chat_model
 
 ##################GET###################################################
 
+def get_members():
+    return db.query_all("""
+        SELECT *
+        FROM members
+    """)
+
 
 def get_member_by_member_id(member_id):
     try:
