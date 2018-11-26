@@ -1,5 +1,6 @@
 import app.db as db
 from app import utils
+from app.exceptions import exceptions
 
 """
     /get_messages_by_user_id
@@ -7,13 +8,17 @@ from app import utils
 
 
 def get_messages_by_user_id(user_id, limit=10):
-    result = db.query_all("""
-        SELECT *
-        FROM messages
-        WHERE user_id = %(user_id)s
-        LIMIT %(limit)s
-    """, user_id=user_id, limit=limit)
+    try:
+        result = db.query_all("""
+            SELECT *
+            FROM messages
+            WHERE user_id = %(user_id)s
+            LIMIT %(limit)s
+        """, user_id=user_id, limit=limit)
+    except Exception:
+        raise exceptions.UserNotFoundException()
     return result
+
 
 """
     /list_chats/
@@ -21,14 +26,16 @@ def get_messages_by_user_id(user_id, limit=10):
 
 
 def get_chats_by_user_id(user_id, limit=10):
-    return db.query_all("""
-        SELECT * 
-        FROM chats
-        WHERE user_id = %(user_id)s
-        ORDER BY added_at DESC
-        LIMIT %(limit)s
-    """, user_id=user_id, limit=limit)
-
+    try:
+        return db.query_all("""
+            SELECT * 
+            FROM chats
+            WHERE user_id = %(user_id)s
+            ORDER BY added_at DESC
+            LIMIT %(limit)s
+        """, user_id=user_id, limit=limit)
+    except Exception:
+        raise exceptions.ChatNotFoundException()
 
 """
     /search_chats/
@@ -36,11 +43,14 @@ def get_chats_by_user_id(user_id, limit=10):
 
 
 def search_chat_by_param(user_id, search_param):
-    return db.query_one("""
-        SELECT *
-        FROM chats
-        WHERE user_id = %(user_id)s and is_group_chat = false and topic like %(search_param)s
-    """, user_id=user_id, search_param=search_param)
+    try:
+        return db.query_one("""
+            SELECT *
+            FROM chats
+            WHERE user_id = %(user_id)s and is_group_chat = false and topic like %(search_param)s
+        """, user_id=user_id, search_param=search_param)
+    except Exception:
+        raise exceptions.ChatNotFoundException()
 
 
 """
@@ -49,12 +59,15 @@ def search_chat_by_param(user_id, search_param):
 
 
 def search_users(search_param, limit=10):
-    return db.query_all("""
-        SELECT *
-        FROM users
-        WHERE nick like %(search_param)s or name like %(search_params)s
-        LIMIT %(limit)s
-    """, search_param=search_param, limit=limit)
+    try:
+        return db.query_all("""
+            SELECT *
+            FROM users
+            WHERE nick like %(search_param)s or name like %(search_params)s
+            LIMIT %(limit)s
+        """, search_param=search_param, limit=limit)
+    except Exception:
+        raise exceptions.UserNotFoundException()
 
 
 """
@@ -66,6 +79,7 @@ def create_chat_by_user_id(user_id, companion_id):
     chat_id = utils.get_uuid()
     member_user_id = utils.get_uuid()
     member_companion_id = utils.get_uuid()
+    # TODO add exceptions
     db.edit_query("""
         INSERT INTO chats (chat_id, is_group_chat, topic) 
         VALUES (%(chat_id)s, false, %(topic)s)
@@ -73,7 +87,7 @@ def create_chat_by_user_id(user_id, companion_id):
     db.edit_query("""
         INSERT INTO members (member_id ,user_id, chat_id) 
         VALUES (%(member_id)s, %(user_id)s, chat_id)
-    """, member_id=member_user_id ,user_id=user_id, chat_id=chat_id)
+    """, member_id=member_user_id, user_id=user_id, chat_id=chat_id)
     db.edit_query("""
         INSERT INTO members (member_id, user_id, chat_id) 
         VALUES (%(member_id)s , %(user_id)s, %(chat_id)s)
@@ -87,11 +101,15 @@ def create_chat_by_user_id(user_id, companion_id):
 
 def create_message(user_id, chat_id, content, attachment):
     message_id = utils.get_uuid()
-    member = db.query_one("""
-        SELECT *
-        FROM members 
-        WHERE user_id = %(user_id)s AND chat_id = %(chat_id)s
-    """, user_id=user_id, chat_id=chat_id)
+    try:
+        member = db.query_one("""
+            SELECT *
+            FROM members 
+            WHERE user_id = %(user_id)s AND chat_id = %(chat_id)s
+        """, user_id=user_id, chat_id=chat_id)
+    except Exception:
+        raise exceptions.MemberNotFoundException()
+
     # TODO throw exceptions: user/member not found
     if member is None or member.get('member_id') is None:
         return {}
@@ -107,7 +125,7 @@ def create_message(user_id, chat_id, content, attachment):
             INSERT INTO attachments (attachment_id, chat_id, user_id, message_id, "type", url)
             VALUES (%(attachment_id)s , %(chat_id)s, %(user_id)s, %(message_id)s, %(type_)s, %(url)s)
         """, attachment_id=attachment_id, chat_id=chat_id, user_id=user_id,
-                     message_id=message_id, type_=attachment['type'], url=attachment['url'])
+                      message_id=message_id, type_=attachment['type'], url=attachment['url'])
 
 
 def read_message(user_id, chat_id, message_id):
@@ -118,16 +136,34 @@ def read_message(user_id, chat_id, message_id):
 
 
 def create_group_chat(user_id, topic):
-    pass
+    chat_id = utils.get_uuid()
+    db.edit_query("""
+        INSERT INTO chats (chat_id, topic)
+        VALUES (%(chat_id)s, %(topic)s)
+    """,chat_id=chat_id, topic=topic)
 
 
-def add_member_to_group_chat(chat_id, user_ids):
-    pass
+def add_member_to_group_chat(chat_id, user_id):
+    chat = db.query_one("""
+        SELECT *
+        FROM chats 
+        WHERE chat_id = %(chat_id)s
+    """)
+
+    # TODO throw exception when chat is not found
+    if chat is not None:
+        member_id = utils.get_uuid()
+        db.edit_query("""
+            INSERT INTO members (member_id, user_id, chat_id)
+            VALUES (%(member_id)s, %(user_id)s, %(chat_id)s)
+        """, member_id=member_id, user_id=user_id, chat_id=chat_id)
 
 
-def leave_from_group_chat(user_id):
-    pass
+def leave_from_group_chat(user_id, chat_id):
 
+    # TODO
+    if member is not None:
+        db.edit_query("""
+            DELETE FROM members WHERE user_id = %(user_id)s AND chat_id = %(chat_id)s    
+        """, chat_id=chat_id, user_id=user_id)
 
-def upload_file(user_id, content, chat_id):
-    pass

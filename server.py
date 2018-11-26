@@ -48,10 +48,8 @@ def create_payload(method, params):
 
 if __name__ == '__main__':
 
-    #payload = create_payload('api.get_messages', [{'user_id': '596b924c-4755-4e4b-a6ef-fcd6403ee552'}])
-    #response = requests.post(url, data=json.dumps(payload), headers=headers)
-
     #send_message = send_message()
+
     get_messages = get_messages()
 
     print(get_messages.content)

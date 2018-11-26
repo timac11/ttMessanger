@@ -1,28 +1,38 @@
-from app import app, jsonrpc, model
-from flask import request, abort, jsonify
+from app import app, jsonrpc, model, vk
+from flask import request, abort, jsonify,redirect, url_for, session
 
 import json
 
 
-@app.route("/<string:name>/")
-@app.route("/")
-def index(name='World'):
-    return 'Hello {}!'.format(name)
+@app.route('/')
+def index():
+    return redirect(url_for('login'))
 
 
-@app.route("/form", methods=['GET', 'POST'])
-def form():
-    if request.method == 'GET':
-        return '''<html><head></head><body>
-        <form method="POST" actions="/form/">
-            <input name="first_name">
-            <input name="last_name">
-            <input type="submit">
-        </form></body></html>
-        '''
-    else:
-        response = jsonify( request.form )
-        return response
+@app.route('/login')
+def login():
+    return vk.authorize(callback=url_for('vk_authorized',
+        next=request.args.get('next') or request.referrer or None,
+        _external=True))
+
+
+@app.route('/login/authorized')
+@vk.authorized_handler
+def vk_authorized(resp):
+    if resp is None:
+        return 'Access denied: reason=%s error=%s' % (
+            request.args['error_reason'],
+            request.args['error_description']
+        )
+    access_token = resp['access_token']
+    email = resp.get('email')
+    session['oauth_token'] = (resp['access_token'], '')
+    return "Email: {}".format( email )
+
+
+@vk.tokengetter
+def get_vk_oauth_token():
+    return session.get('oauth_token')
 
 
 """

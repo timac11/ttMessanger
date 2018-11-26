@@ -1,3 +1,6 @@
 DATABASE='messenger'
 USER_NAME='postgres'
 PASSWORD='52415'
+
+VK_APP_ID = ''
+VK_APP_SECRET = ''
