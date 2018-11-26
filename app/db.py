@@ -19,20 +19,43 @@ def get_cursor():
     return connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 
+"""
+    this method is used for execution of methods:
+    UPDATE, DELETE, INSERT
+"""
+
+
 def edit_query(query, **params):
     with get_cursor() as cursor:
         cursor.execute(query, params)
 
 
+"""
+    return dict with row if it is present 
+    else return None 
+"""
+
+
 def query_one(query, **params):
     with get_cursor() as cursor:
         cursor.execute(query, params)
-        return dict(cursor.fetchone())
+        result = cursor.fetchone()
+        if result is None:
+            return None
+        else:
+            return dict(result)
+
+
+"""
+    :return if presented array of dict
+    else return []
+"""
 
 
 def query_all(query, **params):
     with get_cursor() as cursor:
         cursor.execute(query, params)
+        print(query)
         result = []
         for i in range(cursor.rowcount):
             result.append(dict(cursor.fetchone()))

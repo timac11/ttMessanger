@@ -11,10 +11,10 @@ def execute_request(payload):
     return requests.post(url, data=json.dumps(payload), headers=headers)
 
 
-def get_messages():
+def get_messages(user_id):
     return execute_request(create_payload(
         'api.get_messages',
-        [{'user_id': '596b924c-4755-4e4b-a6ef-fcd6403ee552'}]
+        [{'user_id': user_id}]
     ))
 
 
@@ -29,6 +29,14 @@ def send_message():
     ))
 
 
+def get_chats_by_user_id():
+    return  execute_request(create_payload(
+        'api.get_user_chats',
+        [{
+            'user_id': '596b924c-4755-4e4b-a6ef-fcd6403ee552'
+        }]
+    ))
+
 def create_payload(method, params):
     return {
         'method': method,
@@ -38,7 +46,7 @@ def create_payload(method, params):
 
 
 """
-    In this case there is inly one user with hardcoded 
+    In this case there is only one user with hardcoded 
     user_id = 596b924c-4755-4e4b-a6ef-fcd6403ee552
     chat_id = 596b924c-4755-4e4b-a6ef-fcd6403ee551
     member_id = 596b924c-4755-4e4b-a6ef-fcd6403ee550
@@ -50,6 +58,8 @@ if __name__ == '__main__':
 
     #send_message = send_message()
 
-    get_messages = get_messages()
+    #chats = get_chats_by_user_id()
+    #get_messages1 = get_messages('596b924c-4755-4e4b-a6ef-fcd6403ee552')
+    #get_messages2 = get_messages('596b924c-4755-4e4b-a6ef-fcd6403ee400')
 
-    print(get_messages.content)
+    print(dict(None))

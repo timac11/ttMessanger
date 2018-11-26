@@ -3,7 +3,6 @@ from flask import request, abort, jsonify,redirect, url_for, session
 
 import json
 
-
 @app.route('/')
 def index():
     return redirect(url_for('login'))
@@ -59,6 +58,12 @@ def get_messages(params):
         content - string
         attachment - object 
 """
+
+
+@jsonrpc.method('api.get_user_chats')
+def get_user_chats(params):
+    print(params)
+    return model.get_chats_by_user_id(params.get('user_id'))
 
 
 @jsonrpc.method('api.create_message')
