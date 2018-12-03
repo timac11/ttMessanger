@@ -1,7 +1,7 @@
-from app import app, jsonrpc, model, vk
+from app import app, jsonrpc, model, vk, s3_client, config
 from flask import request, abort, jsonify,redirect, url_for, session
+import base64
 
-import json
 
 @app.route('/')
 def index():
@@ -86,3 +86,18 @@ def create_message(params):
 @jsonrpc.method('api.read_messages')
 def read_messages(params):
     None
+
+
+@jsonrpc.method( 'api.upload_file' )
+def upload_file( b64content, filename ):
+    content = base64.b64decode( b64content )
+    s3_client.put_object( Bucket=config.S3_BUCKET_NAME, Key=filename, Body=content )
+    return b64content
+
+
+@jsonrpc.method( 'api.download_file' )
+def download_file( filename ):
+    response = s3_client.get_object( Bucket=config.S3_BUCKET_NAME, Key=filename )
+    content = response.get('Body').read().decode('utf8')
+    print( content, dir( response ) )
+    return content
