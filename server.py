@@ -68,9 +68,15 @@ if __name__ == '__main__':
         b64_content = base64.b64encode(content).decode('utf-8')
         #print(b64_content)
 
-        # response = service.api.upload_file( b64_content, filename )
+        response = service.api.upload_file(b64_content,
+                                            filename,
+                                            '596b924c-4755-4e4b-a6ef-fcd6403ee552',
+                                            '596b924c-4755-4e4b-a6ef-fcd6403ee551',
+                                            'application/json'
+                                            )
         # print( "Response: {}".format( response ) )
-        response = service.api.upload_file(b64_content, filename)
+        #response = service.api.download_file(filename)
+
         print("Response: {}".format(response))
         # content = base64.b64decode( b64_content ).decode('utf8')
         # print( content )

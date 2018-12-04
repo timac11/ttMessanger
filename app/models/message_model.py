@@ -32,7 +32,7 @@ def get_messages_by_user_id(user_id, limit=10):
 ##################CREATE#################################################
 
 
-def create_message(user_id, chat_id, content, attachment):
+def create_message(user_id, chat_id, content):
     message_id = utils.get_uuid()
     try:
         member_model.get_member_by_user_id_and_chat_id(user_id, chat_id)
@@ -53,6 +53,7 @@ def create_message(user_id, chat_id, content, attachment):
             %(content)s
         )
     """, message_id=str(message_id), chat_id=str(chat_id), user_id=str(user_id), content=str(content))
+    return message_id
 
 
 def read_message(user_id, chat_id, message_id):

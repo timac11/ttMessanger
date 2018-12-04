@@ -6,6 +6,7 @@ import boto3
 
 app = Flask(__name__)
 jsonrpc = JSONRPC(app, '/api/')
+app.secret_key = 'oXFBpEnJMlFWX5jNQ9Yp'
 
 s3_session = boto3.session.Session()
 s3_client = s3_session.client( service_name='s3',\
