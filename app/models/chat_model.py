@@ -1,41 +1,21 @@
 import app.db as db
 from app import utils
 from app.exceptions import exceptions
-from app.models import user_model, member_model
+from app.models import member_model
+from app import db as sql_alchemy_db
+from app.models.entities import chat
 
-
-##################GET###################################################
 
 def get_chats():
-    return db.query_all("""
-        SELECT *
-        FROM chats
-    """)
+    return sql_alchemy_db.session.query(chat.Chat).all()
 
 
 def get_chat_by_chat_id(chat_id):
-    try:
-        result = db.query_one("""
-            SELECT *
-            FROM chats 
-            WHERE chat_id = %(chat_id)s
-        """, chat_id=chat_id)
-        if result is None:
-            raise exceptions.ChatNotFoundException
-    except Exception:
-        raise exceptions.ChatNotFoundException
+    return sql_alchemy_db.session.query(chat.Chat).filter_by(chat_id=chat_id).all()
 
 
-def get_chats_by_user_id(user_id, limit=10):
-    try:
-        return db.query_all("""
-            SELECT * 
-            FROM chats
-            WHERE user_id = %(user_id)s
-            LIMIT %(limit)s
-        """, user_id=user_id, limit=limit)
-    except Exception:
-        raise exceptions.ChatNotFoundException()
+def get_chats_by_user_id(user_id):
+    return sql_alchemy_db.session.query(chat.Chat).filter_by(user_id=user_id).all()
 
 
 def search_chat_by_param(user_id, search_param):
@@ -47,13 +27,6 @@ def search_chat_by_param(user_id, search_param):
         """, user_id=user_id, search_param=search_param)
     except Exception:
         raise exceptions.ChatNotFoundException()
-
-
-def leave_from_group_chat(user_id, chat_id):
-    pass
-
-
-##################CREATE#################################################
 
 
 def create_chat_by_user_id(user_id, companion_id):

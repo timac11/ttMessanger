@@ -2,11 +2,18 @@ from flask import Flask
 from flask_jsonrpc import JSONRPC
 from app import config
 from flask_oauth import OAuth
+from flask_sqlalchemy import SQLAlchemy
 import boto3
 
 app = Flask(__name__)
+
 jsonrpc = JSONRPC(app, '/api/')
+
 app.secret_key = 'oXFBpEnJMlFWX5jNQ9Yp'
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres@localhost/messenger'
+
+db = SQLAlchemy(app)
 
 s3_session = boto3.session.Session()
 s3_client = s3_session.client( service_name='s3',\
